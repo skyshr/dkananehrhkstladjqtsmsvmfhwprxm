@@ -17,6 +17,6 @@ void    ft_init_data(t_rush *rush_data, int size, char *str)
         rush_data->col[n] = (int *)malloc(sizeof(int) * (size + 1));
         n++;
     }
-    reset_data(rush_data, size);
-    copy_table(str, rush_data);
+    ft_reset_data(rush_data, size); //0 초기화
+    ft_copy_table(str, rush_data); //str 을 rush->data로 복사 
 }

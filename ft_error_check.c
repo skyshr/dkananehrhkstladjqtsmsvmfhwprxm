@@ -4,7 +4,7 @@ int	error_check(char *str)
 {
 	int	n;
 
-	n = erase_blank(str);
+	n = ft_erase_blank(str);
 	if (n == -1)
 	{
 		ft_putstr("No input number over 9.\n");
@@ -26,7 +26,7 @@ int	error_check(char *str)
 		ft_putstr("The input must be less than size of 10.\n");
 		return (0);
 	}
-	if (!check_valid_num(str, n))
+	if (!ft_check_valid_num(str, n))
 	{
 		ft_putstr("The value must be a number between 1 and n.\n");
 		return (0);

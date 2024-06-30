@@ -1,3 +1,4 @@
+#include "rush.h"
 void	ft_print(int **res, int size)
 {
 	int		i;

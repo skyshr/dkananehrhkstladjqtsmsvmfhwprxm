@@ -1,6 +1,6 @@
 #include "rush.h"
 
-void    ft_pre_rush_col(int num, int *dif, t_rush *data, t_idx *idx)
+void    ft_pre_rush_col(int *dif, t_rush *data, t_idx *idx)
 {
     int temp;
     
