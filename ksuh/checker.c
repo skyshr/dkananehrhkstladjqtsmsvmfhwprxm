@@ -4,17 +4,15 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <setjmp.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <time.h>
 
 char	*get_next_line(int fd);
 int		ft_strlen(char *str);
 
-jmp_buf env;
-
-void	timeout_handler(int sig) {
-	// 알람 신호를 받으면 프로그램을 종료합니다.
-	longjmp(env, 1);
-}
+pid_t	child_pid;
 
 void	print_1d(int data[40], int size)
 {
@@ -133,43 +131,38 @@ int	checker(char buffer[1000], char *line, int size)
 		k = -1;
 		while (++k < size)
 		{
+			if (buffer[i] == '\0')
+				return (0);
 			arr[j][k] = buffer[i++] - '0';
+			if (arr[j][k] < 0 || arr[j][k] > 9)
+				return (0);
 			i++;
 		}
-		i++;
+		if (j < size - 1 && buffer[i] == '\0')
+			return (0);
+		if (buffer[i] == '\n')
+			i++;
 	}
+	if (buffer[i] != '\0')
+		return (0);
 	return (check(arr, data, size));
 }
 
-char	*ft_strjoin(char *exe_cmd, char *arg)
+long 	get_time(void)
 {
-	char	*dest;
-	int		len;
-	int		i;
-	int		j;
+	struct timeval	time;
+	long			new_time;
 
-	len = ft_strlen(exe_cmd) + ft_strlen(arg) + 2;
-	dest = (char *)malloc((len + 1) * sizeof(char));
-	if (!dest)
-		exit(1);
-	i = 0;
-	while (exe_cmd[i])
-		dest[j++] = exe_cmd[i++];
-	dest[j++] = 34;
-	i = 0;
-	while (arg[i])
-		dest[j++] = arg[i++];
-	dest[j++] = 34;
-	dest[j] = 0;
-	return (dest);
+	gettimeofday(&time, NULL);
+	new_time = time.tv_sec * 1000 + time.tv_usec / 1000;
+	return (new_time);
 }
 
 int	main()
 {
-	char	*bash_cmd;
+    int 	status;
 	char	*line;
 	char	buffer[1000];
-	FILE	*pipe;
 	int		len;
 	int		fd;
 
@@ -186,55 +179,105 @@ int	main()
 	{
 		i = 0;
 		if (j == 3)
-			printf("-------------------------------------------------\n");
+			printf("----------------------Error----------------------\n");
 		else
 			printf("----------------------%d * %d----------------------\n", j, j);
 		while (i++ < 10)
 		{
+			int	fds[2];
 			line = get_next_line(fd);
 			if (!line)
 			{
 				printf("get_next_line error\n");
 				exit(1);
 			}
-			bash_cmd = ft_strjoin("./rush-01 ", line);
-			signal(SIGALRM, timeout_handler);
-			if (setjmp(env) == 0)
+			if (pipe(fds) == -1)
 			{
-				alarm(1);
-				pipe = popen(bash_cmd, "r");
-				if (NULL == pipe) 
+				printf("pipe error\n");
+				exit(1);
+			}
+			child_pid = fork();
+			if (child_pid == -1)
+			{
+				perror("fork");
+				exit(1);
+			}
+			if (child_pid == 0)
+			{
+				dup2(fds[1], STDOUT_FILENO);
+				if (execl("./rush-01", "./rush-01", line, NULL) == -1)
 				{
-					perror("pipe");
-					pclose(pipe);
+					free(line);
 					exit(1);
 				}
-				len = fread(buffer, 1, 2048, pipe);
-				if (!len)
-				{
-					printf("read error\n");
-					pclose(pipe);
-					exit(1);
-				}
-				buffer[len-1] = '\0'; 
-				if (j > 3)
-				{
-					if (checker(buffer, line, j))
-						printf("[OK] ");
-					else
-						printf("[KO] ");
-				}
-				free(bash_cmd);
-				free(line);
-				pclose(pipe);
-				alarm(0);
 			}
 			else
 			{
-				printf("[TO] ");
+				int status;
+				int	t = 0;
+				time_t start_time = get_time();
+				while (1) {
+					pid_t result = waitpid(child_pid, &status, WNOHANG);
+					if (result == 0) {
+						// 자식 프로세스가 아직 종료되지 않음
+						if (get_time() - start_time >= 500) {
+							// 타임아웃 발생
+							kill(child_pid, SIGKILL);
+							t = 1;
+							write(1, "[TO] ", 5);
+							break;
+						}
+						// 100ms 대기 후 다시 확인
+						usleep(100000);
+					} else if (result > 0) {
+						// 자식 프로세스가 종료됨
+						if (WIFEXITED(status)) 
+						{
+						} 
+						else if (WIFSIGNALED(status)) 
+						{
+						}
+						break;
+					} else {
+						perror("waitpid failed");
+						break;
+					}
+				}
+				if (t == 0)
+				{
+					len = read(fds[0], buffer, 2048);
+					if (!len)
+					{
+						printf("read error\n");
+						exit(1);
+					}
+					buffer[len] = '\0'; 
+					if (j > 3)
+					{
+						if (checker(buffer, line, j))
+							write(1, "[OK] ", 5);
+						else
+							write(1, "[KO] ", 5);
+					}
+					else
+					{
+						int sign;
+						sign = 0;
+						for (int i = 0; i < len; i++)
+						{
+							if ((buffer[i] >= 'a' && buffer[i] <= 'z') \
+								|| (buffer[i] >= 'A' && buffer[i] <= 'Z'))
+							{
+								sign = 1;
+								write(1, "[OK] ", 5);
+								break ;
+							}
+						}
+						if (!sign)
+							write(1, "[KO] ", 5);
+					}
+				}
 				free(line);
-				free(bash_cmd);
-				pclose(pipe);
 			}
 		}
 		line = get_next_line(fd);
