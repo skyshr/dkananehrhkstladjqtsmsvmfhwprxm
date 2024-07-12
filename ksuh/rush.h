@@ -42,17 +42,17 @@ t_rush	*init_rush(int size, char *arg);
 int		**init_2d(int size);
 
 /* init_utils.c */
-void	free_2d(int **arr, int size);
 void	init_rush_vars(t_rush *rush);
 void	free_rush(t_rush **rush);
 
 /* solve.c */
 void	rushy(t_rush *rush);
-int		solve_rush(int num, int col, t_rush *rush);
+
 /* solve_validation.c */
-int		isvalid_num(int num, int row, int data[6], t_rush *rush);
+int		isvalid_num(int row, int data[6], t_rush *rush);
 
 /* solve_utils.c */
-int		next_rush(int num, int data[6], t_rush *rush);
+void	pre_solve(int row, int col, t_rush *rush);
+void	post_solve(int row, int col, int data[6], t_rush *rush);
 
 #endif

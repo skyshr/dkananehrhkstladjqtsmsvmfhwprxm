@@ -6,34 +6,11 @@
 /*   By: ksuh <ksuh@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/02 16:19:36 by ksuh              #+#    #+#             */
-/*   Updated: 2024/07/02 16:56:42 by ksuh             ###   ########.fr       */
+/*   Updated: 2024/07/11 17:50:10 by ksuh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rush.h"
-
-static void	pre_solve(int row, int col, t_rush *rush);
-static void	post_solve(int row, int col, int data[6], t_rush *rush);
-
-int	next_rush(int num, int data[6], t_rush *rush)
-{
-	int	row;
-	int	col;
-
-	row = data[4];
-	col = data[5];
-	data[0] = rush->up_idx[col];
-	data[1] = rush->down_idx[col];
-	data[2] = rush->left_idx[row];
-	data[3] = rush->right_idx[row];
-	rush->row_visited[row][num] = 1;
-	pre_solve(row, col, rush);
-	if (solve_rush(num, data[5] + 1, rush))
-		return (1);
-	post_solve(row, col, data, rush);
-	rush->row_visited[row][num] = 0;
-	return (0);
-}
 
 void	pre_solve(int row, int col, t_rush *rush)
 {

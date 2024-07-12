@@ -6,7 +6,7 @@
 /*   By: ksuh <ksuh@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/02 16:19:40 by ksuh              #+#    #+#             */
-/*   Updated: 2024/07/02 16:43:40 by ksuh             ###   ########.fr       */
+/*   Updated: 2024/07/11 17:47:55 by ksuh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static int	isvalid_down(int row, int col, t_rush *rush);
 static int	isvalid_left(int row, int col, t_rush *rush);
 static int	isvalid_right(int row, int col, t_rush *rush);
 
-int	isvalid_num(int num, int row, int data[6], t_rush *rush)
+int	isvalid_num(int row, int data[6], t_rush *rush)
 {
 	int	col;
 
@@ -31,7 +31,11 @@ int	isvalid_num(int num, int row, int data[6], t_rush *rush)
 		return (0);
 	if (!isvalid_right(row, col, rush))
 		return (0);
-	return (next_rush(num, data, rush));
+	data[0] = rush->up_idx[col];
+	data[1] = rush->down_idx[col];
+	data[2] = rush->left_idx[row];
+	data[3] = rush->right_idx[row];
+	return (1);
 }
 
 int	isvalid_up(int row, int col, t_rush *rush)

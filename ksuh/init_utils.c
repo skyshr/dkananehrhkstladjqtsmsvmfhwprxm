@@ -6,23 +6,13 @@
 /*   By: ksuh <ksuh@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/02 16:19:17 by ksuh              #+#    #+#             */
-/*   Updated: 2024/07/02 16:43:40 by ksuh             ###   ########.fr       */
+/*   Updated: 2024/07/11 17:20:16 by ksuh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rush.h"
 
-void	free_2d(int **arr, int size)
-{
-	int	i;
-
-	if (!arr)
-		return ;
-	i = 0;
-	while (i < size)
-		free(arr[i++]);
-	free(arr);
-}
+static void	free_2d(int **arr, int size);
 
 void	init_rush_vars(t_rush *rush)
 {
@@ -56,4 +46,16 @@ void	free_rush(t_rush **rush)
 	free(tmp->row_right);
 	free(tmp);
 	tmp = NULL;
+}
+
+void	free_2d(int **arr, int size)
+{
+	int	i;
+
+	if (!arr)
+		return ;
+	i = 0;
+	while (i < size)
+		free(arr[i++]);
+	free(arr);
 }

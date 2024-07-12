@@ -5,9 +5,18 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/wait.h>
-#include <sys/types.h>
 #include <sys/time.h>
-#include <time.h>
+
+#define ONE "1."
+#define TWO "2."
+#define THREE "3."
+#define FOUR "4."
+#define FIVE "5."
+#define SIX "6."
+#define SEVEN "7."
+#define EIGHT "8."
+#define NINE "9."
+#define TEN "10."
 
 char	*get_next_line(int fd);
 int		ft_strlen(char *str);
@@ -108,6 +117,34 @@ int	check(int arr[10][10], int data[40], int size)
 	return (1);
 }
 
+void	print_num(int cnt)
+{
+	int	remainder;
+
+	remainder = cnt % 10;
+	write(1, "\033[0m", 4);
+	if (remainder == 1)
+		write(1, ONE, 2);
+	else if (remainder == 2)
+		write(1, TWO, 2);
+	else if (remainder == 3)
+		write(1, THREE, 2);
+	else if (remainder == 4)
+		write(1, FOUR, 2);
+	else if (remainder == 5)
+		write(1, FIVE, 2);
+	else if (remainder == 6)
+		write(1, SIX, 2);
+	else if (remainder == 7)
+		write(1, SEVEN, 2);
+	else if (remainder == 8)
+		write(1, EIGHT, 2);
+	else if (remainder == 9)
+		write(1, NINE, 2);
+	else
+		write(1, TEN, 3);
+}
+
 int	checker(char buffer[1000], char *line, int size)
 {
 	int	data[40];
@@ -165,7 +202,33 @@ int	main()
 	char	buffer[1000];
 	int		len;
 	int		fd;
+	int		cnt;
+	FILE	*pf;
 
+	pf = popen("clear", "w");
+	if (pf == NULL)
+	{
+		perror("popen");
+		exit(1);
+	}
+	pclose(pf);
+	printf("────────────────────────────────────────────────────────────────────────────────\n");
+    printf("|                                                                              |\n");
+    printf("|  / \\__                                                                __/ \\  |\n");
+    printf("| (    @\\___           -       -           -       -      -         ___/@    ) |\n");
+    printf("| /         O       oooooooooooooooooooooooooooooooooooooooo       O         \\ |\n");
+    printf("|/   (_____ /       o  ######   ##   ##   ######  ##   ##  o       \\ _____)   \\|\n");
+    printf("|_/_____/ U         o  #######  ##   ##  #######  ##   ##  o         U \\_____\\_|\n");
+    printf("|           |       o  ##   ##  ##   ##  ##       ##   ##  o   |               |\n");
+    printf("|                   o  ######   ##   ##   #####   #### ##  o                   |\n");
+    printf("|                   o  ##   ##  ##   ##       ##  ##   ##  o                   |\n");
+    printf("|  / \\__            o  ##   ##  #######  #######  ##   ##  o            __/ \\  |\n");
+    printf("| (    @\\___     -  o  ##   ##   #####   ######   ##   ##  o   -    ___/@    ) |\n");
+    printf("| /         O       oooooooooooooooooooooooooooooooooooooooo       O         \\ |\n");
+    printf("|/   (_____ /    -       -                 -       -      -        \\ _____)   \\|\n");
+    printf("|_/_____/ U                                                          U \\_____\\_|\n");
+    printf("|                                                                              |\n");
+    printf("───────────────────────────────────────────────────────────────────────────────\n");
 	fd = open("testfile", O_RDONLY);
 	if (fd == -1)
 	{
@@ -174,14 +237,16 @@ int	main()
 	}
 	int	j;
 	int	i;
+	cnt = 1;
 	j = 2;
 	while (j++ < 9)
 	{
 		i = 0;
+		int	correct = 0;
 		if (j == 3)
-			printf("----------------------Error----------------------\n");
+			printf(" --Error--\n");
 		else
-			printf("----------------------%d * %d----------------------\n", j, j);
+			printf(" --%d * %d--\n", j, j);
 		while (i++ < 10)
 		{
 			int	fds[2];
@@ -219,18 +284,16 @@ int	main()
 				while (1) {
 					pid_t result = waitpid(child_pid, &status, WNOHANG);
 					if (result == 0) {
-						// 자식 프로세스가 아직 종료되지 않음
 						if (get_time() - start_time >= 500) {
-							// 타임아웃 발생
 							kill(child_pid, SIGKILL);
 							t = 1;
+							print_num(cnt);
+							write(1, "\033[1;33m", 7);
 							write(1, "[TO] ", 5);
 							break;
 						}
-						// 100ms 대기 후 다시 확인
 						usleep(100000);
 					} else if (result > 0) {
-						// 자식 프로세스가 종료됨
 						if (WIFEXITED(status)) 
 						{
 						} 
@@ -255,9 +318,18 @@ int	main()
 					if (j > 3)
 					{
 						if (checker(buffer, line, j))
+						{
+							print_num(cnt);
+							write(1, "\033[1;32m", 7);
 							write(1, "[OK] ", 5);
+							correct++;
+						}
 						else
+						{
+							print_num(cnt);
+							write(1, "\033[1;31m", 7);
 							write(1, "[KO] ", 5);
+						}
 					}
 					else
 					{
@@ -269,20 +341,29 @@ int	main()
 								|| (buffer[i] >= 'A' && buffer[i] <= 'Z'))
 							{
 								sign = 1;
+								print_num(cnt);
+								write(1, "\033[1;32m", 7);
 								write(1, "[OK] ", 5);
+								correct++;
 								break ;
 							}
 						}
 						if (!sign)
+						{
+							print_num(cnt);
+							write(1, "\033[1;31m", 7);
 							write(1, "[KO] ", 5);
+						}
 					}
 				}
 				free(line);
+				cnt++;
 			}
 		}
 		line = get_next_line(fd);
 		free(line);
-		printf("\n-------------------------------------------------\n");
+		write(1, "\033[0m", 4);
+		printf("\n%68d/10\n", correct);
 	}
 	return (0);
 }
