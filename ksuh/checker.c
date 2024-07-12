@@ -238,7 +238,7 @@ int	main()
 	int	j;
 	int	i;
 	cnt = 1;
-	j = 2;
+	j = 3;
 	while (j++ < 9)
 	{
 		i = 0;
@@ -292,7 +292,7 @@ int	main()
 							write(1, "[TO] ", 5);
 							break;
 						}
-						usleep(100000);
+						usleep(300000);
 					} else if (result > 0) {
 						if (WIFEXITED(status)) 
 						{
