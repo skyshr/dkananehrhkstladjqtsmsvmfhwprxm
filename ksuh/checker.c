@@ -197,7 +197,6 @@ long 	get_time(void)
 
 int	main()
 {
-    int 	status;
 	char	*line;
 	char	buffer[1000];
 	int		len;
